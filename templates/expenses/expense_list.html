@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% load ff %}
+{% block title %}Expenses - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}expenses{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Expenses</h1><p>Running costs: rent, wages, bills and more. Ingredient buying is under Purchases.</p></div>
+  <div class="actions"><a class="btn primary" href="{% url 'expense_create' %}">Record expense</a>
+  <a class="btn ghost" href="{% url 'expense_category_list' %}">Categories</a>
+  <a class="btn ghost" href="{% url 'expense_csv' %}?start={{ start|date:'Y-m-d' }}&amp;end={{ end|date:'Y-m-d' }}&amp;category={{ f_category }}">Download CSV</a></div></div>
+
+<form class="filters" method="get">
+  <label>From <input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></label>
+  <label>To <input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></label>
+  <label>Category <select name="category"><option value="">All</option>
+    {% for c in categories %}<option value="{{ c.pk }}" {% if f_category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></label>
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+<div class="cols">
+  <section class="panel">
+    <h2>Total &middot; {{ total|money }}</h2>
+    {% if by_cat %}
+    <table>
+      {% for c in by_cat %}<tr><td>{{ c.name }}</td><td class="num">{{ c.spent|money }}</td>
+        <td style="width:30%"><div style="height:10px;border-radius:5px;background:var(--ketchup);width:{{ c.pct }}%"></div></td></tr>{% endfor %}
+    </table>
+    {% else %}<p class="empty">No expenses in this period.</p>{% endif %}
+  </section>
+</div>
+
+<section class="panel" style="margin-top:16px"><div class="tablewrap">
+{% if page.object_list %}
+<table>
+  <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Paid to</th><th>Method</th><th class="num">Amount</th><th></th></tr></thead>
+  {% for e in page.object_list %}
+  <tr>
+    <td class="muted">{{ e.date|date:"j M Y" }}</td>
+    <td>{{ e.category.name }}</td>
+    <td>{{ e.description }}{% if e.reference %} <span class="muted">({{ e.reference }})</span>{% endif %}</td>
+    <td class="muted">{{ e.payee }}</td>
+    <td>{{ e.get_payment_method_display }}</td>
+    <td class="num">{{ e.amount|money }}</td>
+    <td class="num"><a href="{% url 'expense_edit' e.pk %}">Edit</a>
+      <form method="post" action="{% url 'expense_delete' e.pk %}" style="display:inline" onsubmit="return confirm('Delete this expense?')">{% csrf_token %}<button class="btn small ghost" type="submit">Delete</button></form></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}<p class="empty">Nothing recorded for these filters. <a href="{% url 'expense_create' %}">Record an expense</a>.</p>{% endif %}
+</div></section>
+{% include "_pager.html" %}
+{% endblock %}

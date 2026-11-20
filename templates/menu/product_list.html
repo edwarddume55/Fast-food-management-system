@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load ff %}
+{% block title %}Menu - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}menu{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Menu &amp; recipes</h1><p>Cost comes from each recipe at today's average ingredient prices.</p></div>
+  <a class="btn primary" href="{% url 'product_create' %}">Add item</a></div>
+<div class="panel"><div class="tablewrap">
+{% if products %}
+<table>
+  <thead><tr><th>Item</th><th>Category</th><th class="num">Price</th><th class="num">Cost</th><th class="num">Margin</th><th class="num">Can make</th><th></th></tr></thead>
+  {% for p in products %}
+  {% with left=p.max_servings %}
+  <tr>
+    <td><strong>{{ p.name }}</strong>{% if not p.is_active %} <span class="pill">hidden</span>{% endif %}</td>
+    <td class="muted">{{ p.category }}</td>
+    <td class="num">{{ p.price|money }}</td>
+    <td class="num">{{ p.cost|money }}</td>
+    <td class="num {% if p.margin < 0 %}neg{% endif %}">{{ p.margin_pct|floatformat:0 }}%</td>
+    <td class="num">{% if left is None %}<span class="muted">no recipe</span>{% else %}<span class="pill {% if left == 0 %}bad{% elif left < 10 %}low{% else %}ok{% endif %}">{{ left }}</span>{% endif %}</td>
+    <td class="num"><a href="{% url 'product_edit' p.pk %}">Edit</a></td>
+  </tr>
+  {% endwith %}
+  {% endfor %}
+</table>
+{% else %}<p class="empty">No menu items yet. Add ingredients first, then build items from them.</p>{% endif %}
+</div></div>
+{% endblock %}

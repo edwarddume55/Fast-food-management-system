@@ -1,0 +1,15 @@
+{% load static %}<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in - {{ BUSINESS_NAME }}</title><link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
+<body><div class="login"><div class="card">
+  <div class="top">{{ BUSINESS_NAME }}</div>
+  <form method="post">{% csrf_token %}
+    {% if form.errors %}<p class="errorlist">Wrong username or password.</p>{% endif %}
+    <label for="id_username">Username</label>
+    <input id="id_username" name="username" autocomplete="username" autofocus required>
+    <label for="id_password">Password</label>
+    <input id="id_password" name="password" type="password" autocomplete="current-password" required>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="btn primary" type="submit">Sign in</button>
+  </form>
+</div></div></body></html>

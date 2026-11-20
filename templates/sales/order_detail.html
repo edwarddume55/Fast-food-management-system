@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% load ff %}
+{% block title %}{{ order.number }} - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}orders{% endblock %}
+{% block content %}
+<div class="head noprint"><h1>{{ order.number }}</h1>
+  <div class="actions"><button class="btn" type="button" onclick="window.print()">Print receipt</button>
+  <a class="btn primary" href="{% url 'pos' %}">New sale</a></div></div>
+
+<div class="receipt">
+  <h2>{{ BUSINESS_NAME }}</h2>
+  <div class="c">{{ order.number }}<br>{{ order.created_at|date:"j M Y, H:i" }}<br>{{ order.get_order_type_display }}{% if order.created_by %} &middot; {{ order.created_by.get_username }}{% endif %}</div>
+  {% if order.status == 'VOID' %}<div class="c"><span class="stamp">VOID</span></div>{% endif %}
+  <hr>
+  {% for i in order.items.all %}
+    <div class="row"><span>{{ i.quantity }} &times; {{ i.name }}</span><span>{{ i.line_total|floatformat:2 }}</span></div>
+  {% endfor %}
+  <hr>
+  <div class="row"><span>Subtotal</span><span>{{ order.subtotal|floatformat:2 }}</span></div>
+  {% if order.discount %}<div class="row"><span>Discount</span><span>-{{ order.discount|floatformat:2 }}</span></div>{% endif %}
+  <div class="row tot"><span>TOTAL ({{ CURRENCY }})</span><span>{{ order.total|floatformat:2 }}</span></div>
+  {% if order.tax %}<div class="row muted"><span>VAT included</span><span>{{ order.tax|floatformat:2 }}</span></div>{% endif %}
+  <hr>
+  <div class="row"><span>{{ order.get_payment_method_display }}</span><span>{{ order.tendered|floatformat:2 }}</span></div>
+  {% if order.change_due %}<div class="row"><span>Change</span><span>{{ order.change_due|floatformat:2 }}</span></div>{% endif %}
+  <hr><div class="c">Thank you!</div>
+</div>
+
+{% if order.status == 'VOID' %}
+<div class="panel noprint" style="max-width:380px;margin:16px auto 0">
+  <strong>Voided</strong> {{ order.voided_at|date:"j M, H:i" }}{% if order.voided_by %} by {{ order.voided_by.get_username }}{% endif %}<br>
+  <span class="muted">Reason: {{ order.void_reason }}</span>
+</div>
+{% elif is_manager %}
+<form class="panel noprint" method="post" action="{% url 'order_void' order.pk %}" style="max-width:380px;margin:16px auto 0"
+      onsubmit="return confirm('Void this order and return its ingredients to stock?')">
+  {% csrf_token %}
+  <h2>Void this order</h2>
+  <p class="hint">Marks the sale void and puts the ingredients back in stock.</p>
+  <div class="actions"><input name="reason" placeholder="Reason (required)" maxlength="200" required style="flex:1"><button class="btn danger" type="submit">Void</button></div>
+  {% if order.cogs %}<p class="hint" style="margin-top:10px">Food cost {{ order.cogs|money }} &middot; profit {{ order.profit|money }}</p>{% endif %}
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}{% if auto_print %}<script>window.addEventListener('load', function(){ window.print(); });</script>{% endif %}{% endblock %}

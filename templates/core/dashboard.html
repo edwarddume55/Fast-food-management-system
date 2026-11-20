@@ -1,0 +1,73 @@
+{% extends "base.html" %}{% load ff %}
+{% block title %}Dashboard - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}dashboard{% endblock %}
+{% block content %}
+<div class="head">
+  <div><h1>Today</h1><p>{{ today|date:"l, j F Y" }}</p></div>
+  <div class="actions"><a class="btn primary" href="{% url 'pos' %}">New sale</a><a class="btn ghost" href="{% url 'expense_create' %}">Record expense</a><a class="btn ghost" href="{% url 'reports' %}">Reports</a></div>
+</div>
+
+<div class="stats">
+  <div class="stat hot"><span>Sales today</span><strong>{{ revenue|money }}</strong></div>
+  <div class="stat"><span>Orders</span><strong>{{ orders }}</strong></div>
+  <div class="stat"><span>Average order</span><strong>{{ avg|money }}</strong></div>
+  <div class="stat"><span>Gross profit</span><strong class="{% if profit < 0 %}neg{% else %}pos{% endif %}">{{ profit|money }}</strong></div>
+  <div class="stat"><span>Margin</span><strong>{{ margin|floatformat:0 }}%</strong></div>
+  <div class="stat"><span>Stock on hand</span><strong>{{ stock_value|money }}</strong></div>
+</div>
+
+<div class="panel" style="margin-bottom:16px">
+  <h2>{{ month|date:"F" }} so far</h2>
+  <div class="stats" style="margin:12px 0 0">
+    <div class="stat"><span>Gross profit</span><strong>{{ month_gross|money }}</strong></div>
+    <div class="stat"><span>Expenses</span><strong class="{% if month_expenses %}neg{% endif %}">{{ month_expenses|money }}</strong></div>
+    <div class="stat hot"><span>Net profit</span><strong>{{ month_net|money }}</strong></div>
+  </div>
+  <p class="hint" style="margin-top:10px">Gross profit is sales minus VAT and food cost. Net profit also subtracts the expenses you've recorded this month.</p>
+</div>
+
+<div class="cols">
+  <section class="panel">
+    <h2>Last 7 days &middot; {{ week_total|money }}</h2>
+    <div class="bars" role="img" aria-label="Sales for the last seven days">
+      {% for d in week %}
+        <div class="bar {% if d.today %}today{% endif %}" title="{{ d.total|money }} from {{ d.n }} orders">
+          <b>{% if d.total %}{{ d.total|floatformat:0 }}{% endif %}</b><i style="height:{{ d.pct }}%"></i><small>{{ d.label }}</small>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Low stock {% if low_count %}<span class="pill low">{{ low_count }}</span>{% endif %}</h2>
+    {% if low %}
+      <table>
+        {% for i in low %}
+        <tr><td>{{ i.name }}</td><td class="num"><span class="pill {% if i.stock <= 0 %}bad{% else %}low{% endif %}">{{ i.stock|qty }} {{ i.unit }}</span></td></tr>
+        {% endfor %}
+      </table>
+      <div class="actions" style="margin-top:12px">
+        <a class="btn small primary" href="{% url 'purchase_create' %}">Order stock</a>
+        <a class="btn small ghost" href="{% url 'ingredient_list' %}?low=1">See all</a>
+      </div>
+    {% else %}<p class="empty">Everything is above its reorder level.</p>{% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Best sellers today</h2>
+    {% if top %}
+      <table>
+        {% for t in top %}<tr><td>{{ t.name }}</td><td class="num">{{ t.q }} sold</td><td class="num muted">{{ t.rev|money }}</td></tr>{% endfor %}
+      </table>
+    {% else %}<p class="empty">No sales yet today.</p>{% endif %}
+  </section>
+
+  {% if drafts %}
+  <section class="panel">
+    <h2>Waiting to be received</h2>
+    <p>{{ drafts }} draft purchase order{{ drafts|pluralize }}. Stock goes up when you mark them received.</p>
+    <a class="btn small" href="{% url 'purchase_list' %}?status=DRAFT">Open drafts</a>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

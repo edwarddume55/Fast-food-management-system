@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Expense categories - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}expenses{% endblock %}
+{% block content %}
+<div class="head"><h1>Expense categories</h1><a class="btn ghost" href="{% url 'expense_list' %}">Back to expenses</a></div>
+<div class="cols">
+  <section class="panel">
+    <table>
+      {% for c in categories %}
+      <tr><td>{{ c.name }}{% if not c.is_active %} <span class="pill">hidden</span>{% endif %}</td>
+        <td class="num"><form method="post" action="{% url 'expense_category_toggle' c.pk %}">{% csrf_token %}<button class="btn small ghost" type="submit">{% if c.is_active %}Hide{% else %}Show{% endif %}</button></form></td></tr>
+      {% endfor %}
+    </table>
+  </section>
+  <section class="panel formbox">
+    <h2>Add a category</h2>
+    <form method="post">{% csrf_token %}{{ form.as_div }}<button class="btn primary" type="submit">Add category</button></form>
+  </section>
+</div>
+{% endblock %}

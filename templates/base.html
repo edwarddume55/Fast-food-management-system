@@ -1,0 +1,50 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ BUSINESS_NAME }}{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="{% block bodyclass %}{% endblock %}" data-nav="{% block nav %}{% endblock %}">
+<div class="shell">
+  <aside class="side">
+    <div class="brand">{{ BUSINESS_NAME }}<small>Kitchen &amp; counter</small></div>
+    <a class="nav" data-k="pos" href="{% url 'pos' %}">New sale</a>
+    <a class="nav" data-k="orders" href="{% url 'order_list' %}">Orders</a>
+    {% if is_manager %}
+      <div class="group">Manage</div>
+      <a class="nav" data-k="dashboard" href="{% url 'dashboard' %}">Dashboard</a>
+      <a class="nav" data-k="ingredients" href="{% url 'ingredient_list' %}">Stock
+        {% if low_stock_count %}<span class="badge" title="Ingredients at or below reorder level">{{ low_stock_count }}</span>{% endif %}</a>
+      <a class="nav" data-k="purchases" href="{% url 'purchase_list' %}">Purchases</a>
+      <a class="nav" data-k="expenses" href="{% url 'expense_list' %}">Expenses</a>
+      <a class="nav" data-k="suppliers" href="{% url 'supplier_list' %}">Suppliers</a>
+      <a class="nav" data-k="movements" href="{% url 'movement_list' %}">Stock history</a>
+      <a class="nav" data-k="menu" href="{% url 'product_list' %}">Menu &amp; recipes</a>
+      <a class="nav" data-k="reports" href="{% url 'reports' %}">Reports</a>
+      {% if user.is_staff %}<a class="nav" href="{% url 'admin:index' %}">Admin</a>{% endif %}
+    {% endif %}
+    <div class="me">
+      Signed in as <strong>{{ user.get_username }}</strong>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Sign out</button></form>
+    </div>
+  </aside>
+  <main>
+    {% block messages %}
+    {% if messages %}<ul class="msgs">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+    {% endblock %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script>
+  (function () {
+    var k = document.body.dataset.nav;
+    if (!k) return;
+    var a = document.querySelector('.nav[data-k="' + k + '"]');
+    if (a) { a.classList.add('on'); a.setAttribute('aria-current', 'page'); }
+  })();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

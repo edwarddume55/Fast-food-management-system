@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}New sale - {{ BUSINESS_NAME }}{% endblock %}
+{% block bodyclass %}pos{% endblock %}
+{% block nav %}pos{% endblock %}
+{% block messages %}{% endblock %}
+{% block content %}
+{% csrf_token %}
+{{ pos_data|json_script:"pos-data" }}
+<div class="posgrid">
+  <section class="menuside" aria-label="Menu">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+  <section class="ticket" aria-label="Current order">
+    <header>
+      <div class="seg" id="types" role="group" aria-label="Order type"></div>
+    </header>
+    <div class="lines" id="lines"></div>
+    <footer>
+      <div class="sumrow"><span class="muted">Subtotal</span><span id="subtotal"></span></div>
+      <div class="sumrow"><label for="discount" class="muted">Discount</label><input id="discount" type="number" min="0" step="1" inputmode="decimal" value="" placeholder="0" style="width:110px;text-align:right"></div>
+      <div class="sumrow big"><span>Total</span><span id="total"></span></div>
+      <div class="seg" id="pays" role="group" aria-label="Payment method"></div>
+      <div id="cashbox">
+        <div class="sumrow"><label for="tendered" class="muted">Cash received</label><input id="tendered" type="number" min="0" step="1" inputmode="decimal" style="width:130px;text-align:right"></div>
+        <div class="quick" id="quick" style="margin-top:6px"></div>
+        <div class="sumrow" style="margin-top:6px"><span class="muted">Change</span><strong id="change">-</strong></div>
+      </div>
+      <button class="btn primary charge" id="charge" type="button" disabled>Charge</button>
+    </footer>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/pos.js' %}"></script>{% endblock %}

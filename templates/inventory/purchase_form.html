@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{% if purchase %}Edit {{ purchase.number }}{% else %}New purchase{% endif %} - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}purchases{% endblock %}
+{% block content %}
+<div class="head"><div><h1>{% if purchase %}Edit {{ purchase.number }}{% else %}New purchase{% endif %}</h1>
+  <p>Saved as a draft. Stock only changes when you mark it received.</p></div></div>
+<form method="post">{% csrf_token %}
+  <div class="panel formbox" style="max-width:none">
+    <div class="filters" style="margin:0">
+      <label>Supplier {{ form.supplier }}{{ form.supplier.errors }}</label>
+      <label style="flex:1;min-width:220px">Notes {{ form.notes }}</label>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Items</h2>
+    {{ formset.management_form }}{{ formset.non_form_errors }}
+    <div class="tablewrap"><table class="grid">
+      <thead><tr><th>Ingredient</th><th>Quantity</th><th>Cost per unit</th><th>Remove</th></tr></thead>
+      {% for f in formset %}
+      <tr>
+        {% for h in f.hidden_fields %}{{ h }}{% endfor %}
+        <td>{{ f.ingredient }}{{ f.ingredient.errors }}</td>
+        <td>{{ f.quantity }}{{ f.quantity.errors }}</td>
+        <td>{{ f.unit_cost }}{{ f.unit_cost.errors }}</td>
+        <td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table></div>
+    <p class="hint">Leave unused rows empty. Cost per unit is what you paid for one kg, litre or piece, in {{ CURRENCY }}.</p>
+  </div>
+  <div class="actions" style="margin-top:16px"><button class="btn primary" type="submit">Save draft</button>
+    <a class="btn ghost" href="{% url 'purchase_list' %}">Cancel</a></div>
+</form>
+{% endblock %}

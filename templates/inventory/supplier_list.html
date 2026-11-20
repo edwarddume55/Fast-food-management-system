@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Suppliers - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}suppliers{% endblock %}
+{% block content %}
+<div class="head"><h1>Suppliers</h1><a class="btn primary" href="{% url 'supplier_create' %}">Add supplier</a></div>
+<div class="panel"><div class="tablewrap">
+{% if suppliers %}
+<table>
+  <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Address</th><th></th></tr></thead>
+  {% for s in suppliers %}
+  <tr><td><strong>{{ s.name }}</strong>{% if not s.is_active %} <span class="pill">inactive</span>{% endif %}</td>
+    <td>{{ s.phone }}</td><td>{{ s.email }}</td><td class="muted">{{ s.address }}</td>
+    <td class="num"><a href="{% url 'supplier_edit' s.pk %}">Edit</a></td></tr>
+  {% endfor %}
+</table>
+{% else %}<p class="empty">No suppliers yet. Add the people you buy from so purchases can be recorded.</p>{% endif %}
+</div></div>
+{% endblock %}

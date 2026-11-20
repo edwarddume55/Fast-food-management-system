@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="head"><div><h1>Managers only</h1><p>Your account can take orders but can't open this page. Ask a manager if you need access.</p></div></div>
+<a class="btn" href="{% url 'pos' %}">Back to new sale</a>
+{% endblock %}

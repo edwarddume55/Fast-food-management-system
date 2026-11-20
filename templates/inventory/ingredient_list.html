@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load ff %}
+{% block title %}Stock - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}ingredients{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Stock</h1><p>Value on hand: <strong>{{ stock_value|money }}</strong></p></div>
+  <div class="actions"><a class="btn primary" href="{% url 'purchase_create' %}">New purchase</a>
+  <a class="btn ghost" href="{% url 'stock_adjust' %}">Waste / count</a>
+  <a class="btn ghost" href="{% url 'ingredient_create' %}">Add ingredient</a></div></div>
+
+<form class="filters" method="get">
+  <label>Search <input type="search" name="q" value="{{ q }}" placeholder="Ingredient name"></label>
+  <label class="inline"><input type="checkbox" name="low" value="1" {% if low %}checked{% endif %}> Low stock only</label>
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+<div class="panel"><div class="tablewrap">
+{% if ingredients %}
+<table>
+  <thead><tr><th>Ingredient</th><th class="num">In stock</th><th class="num">Reorder at</th><th class="num">Avg cost</th><th class="num">Value</th><th>Supplier</th><th></th></tr></thead>
+  {% for i in ingredients %}
+  <tr>
+    <td><strong>{{ i.name }}</strong>{% if not i.is_active %} <span class="pill">inactive</span>{% endif %}</td>
+    <td class="num"><span class="pill {% if i.stock <= 0 %}bad{% elif i.is_low %}low{% else %}ok{% endif %}">{{ i.stock|qty }} {{ i.unit }}</span></td>
+    <td class="num muted">{{ i.reorder_level|qty }}</td>
+    <td class="num">{{ i.avg_cost|floatformat:2 }}</td>
+    <td class="num">{{ i.stock_value|money }}</td>
+    <td class="muted">{{ i.supplier|default:"-" }}</td>
+    <td class="num"><a href="{% url 'ingredient_edit' i.pk %}">Edit</a> &middot; <a href="{% url 'movement_list' %}?ingredient={{ i.pk }}">History</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}<p class="empty">No ingredients match. <a href="{% url 'ingredient_create' %}">Add one</a>.</p>{% endif %}
+</div></div>
+{% endblock %}

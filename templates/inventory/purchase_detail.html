@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% load ff %}
+{% block title %}{{ purchase.number }} - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}purchases{% endblock %}
+{% block content %}
+<div class="head">
+  <div><h1>{{ purchase.number }} <span class="pill {% if purchase.status == 'RECEIVED' %}ok{% elif purchase.status == 'CANCELLED' %}bad{% else %}low{% endif %}">{{ purchase.get_status_display }}</span></h1>
+    <p>{{ purchase.supplier }} &middot; created {{ purchase.created_at|date:"j M Y, H:i" }}{% if purchase.created_by %} by {{ purchase.created_by.get_username }}{% endif %}
+    {% if purchase.received_at %} &middot; received {{ purchase.received_at|date:"j M Y, H:i" }}{% endif %}</p></div>
+  {% if purchase.status == 'DRAFT' %}
+  <div class="actions">
+    <a class="btn ghost" href="{% url 'purchase_edit' purchase.pk %}">Edit</a>
+    <form method="post" action="{% url 'purchase_cancel' purchase.pk %}" onsubmit="return confirm('Cancel this purchase?')">{% csrf_token %}<button class="btn ghost" type="submit">Cancel purchase</button></form>
+    <form method="post" action="{% url 'purchase_receive' purchase.pk %}" onsubmit="return confirm('Add these items to stock now?')">{% csrf_token %}<button class="btn primary" type="submit">Mark received</button></form>
+  </div>
+  {% endif %}
+</div>
+<div class="panel"><div class="tablewrap"><table>
+  <thead><tr><th>Ingredient</th><th class="num">Quantity</th><th class="num">Cost per unit</th><th class="num">Line total</th></tr></thead>
+  {% for i in purchase.items.all %}
+  <tr><td>{{ i.ingredient.name }}</td><td class="num">{{ i.quantity|qty }} {{ i.ingredient.unit }}</td><td class="num">{{ i.unit_cost|floatformat:2 }}</td><td class="num">{{ i.line_total|money }}</td></tr>
+  {% endfor %}
+  <tr><td colspan="3" class="num"><strong>Total</strong></td><td class="num"><strong>{{ purchase.total|money }}</strong></td></tr>
+</table></div>
+{% if purchase.notes %}<p class="muted">Notes: {{ purchase.notes }}</p>{% endif %}</div>
+{% endblock %}

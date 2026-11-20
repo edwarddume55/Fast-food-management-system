@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}Edit {{ product.name }}{% else %}New menu item{% endif %} - {{ BUSINESS_NAME }}{% endblock %}
+{% block nav %}menu{% endblock %}
+{% block content %}
+<div class="head"><h1>{% if product %}Edit {{ product.name }}{% else %}New menu item{% endif %}</h1></div>
+<form method="post">{% csrf_token %}
+  <div class="panel formbox">{{ form.as_div }}</div>
+  <div class="panel">
+    <h2>Recipe</h2>
+    <p class="hint">What one serving uses. Each sale takes these amounts out of stock automatically.</p>
+    {{ formset.management_form }}{{ formset.non_form_errors }}
+    <div class="tablewrap"><table class="grid">
+      <thead><tr><th>Ingredient</th><th>Amount per serving</th><th>Remove</th></tr></thead>
+      {% for f in formset %}
+      <tr>{% for h in f.hidden_fields %}{{ h }}{% endfor %}
+        <td>{{ f.ingredient }}{{ f.ingredient.errors }}</td><td>{{ f.quantity }}{{ f.quantity.errors }}</td>
+        <td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td></tr>
+      {% endfor %}
+    </table></div>
+  </div>
+  <div class="actions" style="margin-top:16px"><button class="btn primary" type="submit">Save item</button>
+    <a class="btn ghost" href="{% url 'product_list' %}">Cancel</a></div>
+</form>
+{% endblock %}
