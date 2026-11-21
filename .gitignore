@@ -1,5 +1,23 @@
 __pycache__/
-*.pyc
-db.sqlite3
-staticfiles/
+*.py[cod]
+
+# Virtual environments
+venv/
 .venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and backups
+db.sqlite3
+backups/
+
+# Static files
+staticfiles/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
